@@ -55,7 +55,7 @@
     <string name="ip_dialog_title">Choose / copy IP address</string>
     <string name="connection_tips">Connection tips</string>
     <string name="troubleshoot_title">Can\'t open it from your laptop?</string>
-    <string name="troubleshoot_message">Most common causes:\n\n1. AP isolation on the Wi-Fi router\nMany office, campus or boarding-house routers block devices from talking to each other.\n\nBEST FIX:\nTurn on this phone\'s personal hotspot, then connect your laptop to that hotspot.\n\n2. Windows Firewall on the laptop\nMake sure port 8080 isn\'t blocked by Windows Defender Firewall.</string>
+    <string name="troubleshoot_message">Most common causes:\n\n1. AP isolation on the Wi-Fi router\nMany office, campus or boarding-house routers block devices from talking to each other.\n\nBEST FIX:\nTurn on this phone\'s personal hotspot, then connect your laptop to that hotspot.\n\n2. Windows Firewall on the laptop\nMake sure port %1$d isn\'t blocked by Windows Defender Firewall.</string>
     <string name="network_wifi">Wi-Fi</string>
     <string name="network_hotspot">Phone hotspot</string>
     <string name="network_usb">USB tethering</string>

@@ -52,7 +52,7 @@
     <string name="ip_dialog_title">Pilih / salin alamat IP</string>
     <string name="connection_tips">Tips koneksi</string>
     <string name="troubleshoot_title">Tidak bisa diakses dari laptop?</string>
-    <string name="troubleshoot_message">Penyebab paling umum:\n\n1. Isolasi AP pada router Wi-Fi\nBanyak router Wi-Fi kantor, kampus, atau kos memblokir komunikasi antarperangkat.\n\nSOLUSI TERBAIK:\nNyalakan hotspot pribadi di HP ini, lalu sambungkan laptop ke hotspot tersebut.\n\n2. Windows Firewall di laptop\nPastikan port 8080 tidak diblokir oleh Windows Defender Firewall.</string>
+    <string name="troubleshoot_message">Penyebab paling umum:\n\n1. Isolasi AP pada router Wi-Fi\nBanyak router Wi-Fi kantor, kampus, atau kos memblokir komunikasi antarperangkat.\n\nSOLUSI TERBAIK:\nNyalakan hotspot pribadi di HP ini, lalu sambungkan laptop ke hotspot tersebut.\n\n2. Windows Firewall di laptop\nPastikan port %1$d tidak diblokir oleh Windows Defender Firewall.</string>
     <string name="network_wifi">Wi-Fi</string>
     <string name="network_hotspot">Hotspot HP</string>
     <string name="network_usb">Tethering USB</string>

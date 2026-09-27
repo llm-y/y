@@ -211,7 +211,7 @@
                     android:id="@+id/tvPort"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="Port 8080"
+                    tools:text="Port 50050"
                     android:textColor="@color/text_tertiary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -248,7 +248,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="monospace"
-                        tools:text="http://192.168.1.15:8080"
+                        tools:text="http://192.168.1.15:50050"
                         android:textColor="@color/primary"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -272,7 +272,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:fontFamily="monospace"
-                tools:text="OpenCV: cv2.VideoCapture('http://192.168.1.15:8080/video')"
+                tools:text="OpenCV: cv2.VideoCapture('http://192.168.1.15:50050/video')"
                 android:textColor="@color/text_secondary"
                 android:textSize="11sp" />
 

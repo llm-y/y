@@ -49,7 +49,7 @@ class WebcamService : LifecycleService() {
         const val NOTIFICATION_ID = 1001
         const val ACTION_START = "ACTION_START"
         const val ACTION_STOP = "ACTION_STOP"
-        const val PORT = 8080
+        const val PORT = 50050
 
         const val PREFS_NAME = "webcam_settings"
         const val KEY_SHOW_CAMERA_OVERLAY = "show_camera_overlay"

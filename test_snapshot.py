@@ -9,6 +9,8 @@ import urllib.request
 import numpy as np
 import cv2
 
+PORT = 50050  # Port default server IP Webcam Pro
+
 def main():
     default_ip = "192.168.1.15"
     if len(sys.argv) > 1:
@@ -16,7 +18,7 @@ def main():
     else:
         ip = input(f"Masukkan IP Android [{default_ip}]: ").strip() or default_ip
 
-    shot_url = f"http://{ip}:8080/shot.jpg"
+    shot_url = f"http://{ip}:{PORT}/shot.jpg"
     print(f"[INFO] Mengambil foto snapshot dari {shot_url} ...")
 
     try:

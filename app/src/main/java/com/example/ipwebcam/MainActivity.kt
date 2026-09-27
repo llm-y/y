@@ -326,7 +326,7 @@ class MainActivity : AppCompatActivity() {
     private fun showTroubleshootDialog() {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.troubleshoot_title)
-            .setMessage(R.string.troubleshoot_message)
+            .setMessage(getString(R.string.troubleshoot_message, WebcamService.PORT))
             .setPositiveButton(R.string.action_got_it, null)
             .show()
     }
