@@ -129,4 +129,19 @@
     <string name="guide_autostart_oppo">Di halaman Penggunaan baterai yang sama, aktifkan <b>Izinkan peluncuran otomatis</b>.</string>
     <string name="guide_autostart_xiaomi">Aktifkan <b>Mulai otomatis</b> untuk IP Webcam Pro.</string>
     <string name="guide_autostart_vivo">Buka <b>i Manager › Manajer aplikasi › Mulai otomatis</b>, lalu aktifkan IP Webcam Pro.</string>
+
+    <!-- Port server -->
+    <string name="pref_category_server">Server</string>
+    <string name="pref_port_title">Port server</string>
+    <string name="pref_port_summary">%1$d</string>
+    <string name="pref_port_summary_default">%1$d (default)</string>
+    <string name="port_dialog_title">Port server</string>
+    <string name="port_dialog_message">Laptop atau script OpenCV harus memakai port yang sama. Jika server sedang berjalan, server langsung pindah ke port baru.</string>
+    <string name="port_hint">Port</string>
+    <string name="port_helper">Diizinkan %1$d–%2$d · default %3$d</string>
+    <string name="port_error_range">Masukkan port antara %1$d dan %2$d</string>
+    <string name="action_save">Simpan</string>
+    <string name="action_use_default">Pakai default</string>
+    <string name="server_port_changed">Server dipindah ke %1$s</string>
+    <string name="port_unavailable">Port %1$d sedang dipakai aplikasi lain. Server tetap di port %2$d.</string>
 </resources>

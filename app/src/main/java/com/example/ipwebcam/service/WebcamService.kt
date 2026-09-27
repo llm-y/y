@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.graphics.PixelFormat
@@ -49,17 +50,36 @@ class WebcamService : LifecycleService() {
         const val NOTIFICATION_ID = 1001
         const val ACTION_START = "ACTION_START"
         const val ACTION_STOP = "ACTION_STOP"
-        const val PORT = 50050
+        const val DEFAULT_PORT = 50050
+        const val MIN_PORT = 1024
+        const val MAX_PORT = 65535
 
         const val PREFS_NAME = "webcam_settings"
         const val KEY_SHOW_CAMERA_OVERLAY = "show_camera_overlay"
         const val KEY_OVERLAY_POSITION = "overlay_position"
+        const val KEY_PORT = "server_port"
 
         fun startStreaming(context: Context) {
             val intent = Intent(context, WebcamService::class.java).apply {
                 action = ACTION_START
             }
             ContextCompat.startForegroundService(context, intent)
+        }
+
+        fun isValidPort(port: Int): Boolean = port in MIN_PORT..MAX_PORT
+
+        /** Port server dari Pengaturan (default 50050). */
+        fun getPort(context: Context): Int {
+            val port = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getInt(KEY_PORT, DEFAULT_PORT)
+            return if (isValidPort(port)) port else DEFAULT_PORT
+        }
+
+        fun setPort(context: Context, port: Int) {
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putInt(KEY_PORT, port)
+                .apply()
         }
 
         fun isCameraOverlayEnabled(context: Context): Boolean =
@@ -91,6 +111,10 @@ class WebcamService : LifecycleService() {
 
     var streamUrl: String? = null
         private set
+
+    // Port yang benar-benar sedang dipakai server (bisa berbeda sesaat dari Pengaturan)
+    var serverPort: Int = DEFAULT_PORT
+        private set
     val isStreaming: Boolean get() = httpServer != null
 
     // Callback UI untuk Activity yang sedang ter-bind (dipanggil di main thread)
@@ -119,12 +143,21 @@ class WebcamService : LifecycleService() {
         }
     }
 
+    // Port diganti dari Pengaturan saat server berjalan: pindahkan server ke port baru
+    private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key == KEY_PORT && isStreaming) {
+            applyPortChange()
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
         cameraManager = CameraStreamManager(this)
         cameraManager.startCamera()
         ProcessLifecycleOwner.get().lifecycle.addObserver(appVisibilityObserver)
+        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .registerOnSharedPreferenceChangeListener(prefsListener)
     }
 
     override fun onBind(intent: Intent): IBinder {
@@ -143,17 +176,35 @@ class WebcamService : LifecycleService() {
         return START_NOT_STICKY
     }
 
+    private fun buildUrl(port: Int) = "http://${NetworkUtils.getLocalIpAddress(this)}:$port"
+
     private fun startStreaming() {
-        val url = "http://${NetworkUtils.getLocalIpAddress(this)}:$PORT"
+        val port = getPort(this)
 
         // Wajib dipanggil segera setelah startForegroundService()
-        startForegroundWithType(buildNotification(url))
+        startForegroundWithType(buildNotification(buildUrl(port)))
 
         if (httpServer != null) return
 
-        try {
+        val error = startHttpServer(port)
+        if (error != null) {
+            Toast.makeText(this, getString(R.string.server_start_failed, error), Toast.LENGTH_LONG).show()
+            stopStreaming()
+            return
+        }
+
+        serverPort = port
+        streamUrl = buildUrl(port)
+        acquireLocks()
+        updateOverlayWindow()
+        onStreamingStateChanged?.invoke()
+    }
+
+    /** @return pesan error, atau null jika server berhasil berjalan di port tersebut */
+    private fun startHttpServer(port: Int): String? {
+        return try {
             httpServer = MjpegHttpServer(
-                port = PORT,
+                port = port,
                 cameraManager = cameraManager,
                 audioStreamer = audioStreamer,
                 onControlAction = { action, value -> onControlAction?.invoke(action, value) }
@@ -161,17 +212,42 @@ class WebcamService : LifecycleService() {
                 onClientCountChanged = { count -> this@WebcamService.onClientCountChanged?.invoke(count) }
                 start()
             }
+            null
         } catch (e: Exception) {
             e.printStackTrace()
             httpServer = null
-            Toast.makeText(this, getString(R.string.server_start_failed, e.message), Toast.LENGTH_LONG).show()
-            stopStreaming()
-            return
+            e.message ?: e.javaClass.simpleName
+        }
+    }
+
+    /**
+     * Pindahkan server ke port baru tanpa menghentikan kamera & foreground service.
+     * Jika port baru sedang dipakai aplikasi lain, server kembali ke port lama.
+     */
+    private fun applyPortChange() {
+        val newPort = getPort(this)
+        if (newPort == serverPort) return
+        val oldPort = serverPort
+
+        httpServer?.stop()
+        httpServer = null
+
+        if (startHttpServer(newPort) == null) {
+            serverPort = newPort
+            streamUrl = buildUrl(newPort)
+            Toast.makeText(this, getString(R.string.server_port_changed, streamUrl), Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, getString(R.string.port_unavailable, newPort, oldPort), Toast.LENGTH_LONG).show()
+            if (startHttpServer(oldPort) != null) {
+                stopStreaming()
+                return
+            }
+            // Samakan Pengaturan dengan port yang benar-benar dipakai
+            setPort(this, oldPort)
         }
 
-        streamUrl = url
-        acquireLocks()
-        updateOverlayWindow()
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(NOTIFICATION_ID, buildNotification(streamUrl ?: buildUrl(serverPort)))
         onStreamingStateChanged?.invoke()
     }
 
@@ -343,6 +419,8 @@ class WebcamService : LifecycleService() {
 
     override fun onDestroy() {
         ProcessLifecycleOwner.get().lifecycle.removeObserver(appVisibilityObserver)
+        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .unregisterOnSharedPreferenceChangeListener(prefsListener)
         onStreamingStateChanged = null
         onClientCountChanged = null
         onControlAction = null

@@ -79,7 +79,9 @@ Android-IP-Webcam/
      - **Streaming di latar belakang**: *Abaikan pengoptimalan baterai*, *Aktivitas latar belakang* (pintasan langsung), dan *Tampilkan di atas aplikasi lain*.
      - **Indikator kamera**: tampilkan indikator saat stream berjalan di latar belakang dan pilih posisinya (atas tengah/kiri/kanan, bawah tengah). Ketuk indikator untuk membuka aplikasi.
    - Hentikan stream lewat tombol **Hentikan Server** atau tombol **Hentikan** di notifikasi.
-5. **Bahasa**:
+5. **Port Server**:
+   - Port default `50050`. Ganti lewat ⚙ **Pengaturan › Server › Port server** (1024–65535). Jika server sedang berjalan, server langsung pindah ke port baru; jika port dipakai aplikasi lain, server tetap di port lama.
+6. **Bahasa**:
    - Aplikasi otomatis mengikuti bahasa HP (Indonesia / Inggris). Di Android 13+ bahasa juga bisa dipilih lewat Pengaturan › Aplikasi › IP Webcam Pro › Bahasa.
    - Dashboard web mengikuti bahasa browser.
 

@@ -132,4 +132,19 @@
     <string name="guide_autostart_oppo">On the same Battery usage page, turn on <b>Allow auto launch</b>.</string>
     <string name="guide_autostart_xiaomi">Turn on <b>Autostart</b> for IP Webcam Pro.</string>
     <string name="guide_autostart_vivo">Open <b>i Manager › App manager › Autostart manager</b>, then turn on IP Webcam Pro.</string>
+
+    <!-- Port server -->
+    <string name="pref_category_server">Server</string>
+    <string name="pref_port_title">Server port</string>
+    <string name="pref_port_summary">%1$d</string>
+    <string name="pref_port_summary_default">%1$d (default)</string>
+    <string name="port_dialog_title">Server port</string>
+    <string name="port_dialog_message">Your laptop or OpenCV script must use the same port. If the server is running, it moves to the new port right away.</string>
+    <string name="port_hint">Port</string>
+    <string name="port_helper">Allowed %1$d–%2$d · default %3$d</string>
+    <string name="port_error_range">Enter a port between %1$d and %2$d</string>
+    <string name="action_save">Save</string>
+    <string name="action_use_default">Use default</string>
+    <string name="server_port_changed">Server moved to %1$s</string>
+    <string name="port_unavailable">Port %1$d is used by another app. The server stays on port %2$d.</string>
 </resources>

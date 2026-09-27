@@ -80,7 +80,6 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        binding.tvPort.text = getString(R.string.port_label, WebcamService.PORT)
         updateServerUi()
 
         setupListeners()
@@ -305,7 +304,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        val port = WebcamService.PORT
+        val port = currentPort()
         val items = ips.map { "${networkLabel(it)}: http://${it.ip}:$port" }.toTypedArray()
 
         MaterialAlertDialogBuilder(this)
@@ -326,7 +325,7 @@ class MainActivity : AppCompatActivity() {
     private fun showTroubleshootDialog() {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.troubleshoot_title)
-            .setMessage(getString(R.string.troubleshoot_message, WebcamService.PORT))
+            .setMessage(getString(R.string.troubleshoot_message, currentPort()))
             .setPositiveButton(R.string.action_got_it, null)
             .show()
     }
@@ -349,8 +348,13 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show()
     }
 
+    /** Port yang sedang dipakai server, atau port dari Pengaturan jika server belum berjalan. */
+    private fun currentPort(): Int =
+        webcamService?.takeIf { it.isStreaming }?.serverPort ?: WebcamService.getPort(this)
+
     private fun updateServerUi() {
         val service = webcamService
+        binding.tvPort.text = getString(R.string.port_label, currentPort())
         if (service?.isStreaming == true) {
             val baseUrl = service.streamUrl ?: ""
             binding.viewStatusDot.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.success))
@@ -368,7 +372,7 @@ class MainActivity : AppCompatActivity() {
             showClientCount(0)
 
             // Tampilkan alamat yang akan dipakai (redup) selama server belum berjalan
-            val baseUrl = "http://${NetworkUtils.getLocalIpAddress(this)}:${WebcamService.PORT}"
+            val baseUrl = "http://${NetworkUtils.getLocalIpAddress(this)}:${currentPort()}"
             binding.tvStreamUrl.text = baseUrl
             binding.tvStreamUrl.setTextColor(ContextCompat.getColor(this, R.color.text_tertiary))
             binding.tvOpencvHint.text = getString(R.string.opencv_hint, baseUrl)
