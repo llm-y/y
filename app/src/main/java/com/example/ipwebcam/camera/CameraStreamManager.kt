@@ -39,6 +39,11 @@ class CameraStreamManager(
     private var cameraProvider: ProcessCameraProvider? = null
     private var cameraControl: CameraControl? = null
     private var cameraInfo: CameraInfo? = null
+    private var isStopped = false
+
+    // PreviewView hanya ada selama Activity terlihat; saat layar mati hanya ImageAnalysis yang berjalan
+    private var previewView: PreviewView? = null
+    private var preview: Preview? = null
 
     // Konfigurasi kamera
     var lensFacing: Int = CameraSelector.LENS_FACING_BACK
@@ -69,12 +74,13 @@ class CameraStreamManager(
 
     var onFpsUpdated: ((Int) -> Unit)? = null
 
-    fun startCamera(previewView: PreviewView?, onReady: (() -> Unit)? = null) {
+    fun startCamera(onReady: (() -> Unit)? = null) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
+            if (isStopped) return@addListener
             try {
                 cameraProvider = cameraProviderFuture.get()
-                bindCamera(previewView)
+                bindCamera()
                 onReady?.invoke()
             } catch (e: Exception) {
                 Log.e(TAG, "Gagal menginisialisasi kamera", e)
@@ -82,7 +88,28 @@ class CameraStreamManager(
         }, ContextCompat.getMainExecutor(context))
     }
 
-    private fun bindCamera(previewView: PreviewView?) {
+    /**
+     * Pasang PreviewView saat Activity terlihat. Rebind penuh aman dilakukan di sini
+     * karena aplikasi sedang berada di foreground.
+     */
+    fun attachPreview(view: PreviewView) {
+        previewView = view
+        bindCamera()
+    }
+
+    /**
+     * Lepas PreviewView saat Activity tidak terlihat (tombol power / pindah aplikasi).
+     * Surface PreviewView dihancurkan sistem saat layar mati; jika Preview masih ter-bind,
+     * capture session CameraX ikut macet dan ImageAnalysis (stream) berhenti mengirim frame.
+     * Hanya Preview yang di-unbind supaya kamera tetap terbuka dan stream tidak terputus.
+     */
+    fun detachPreview() {
+        previewView = null
+        preview?.let { cameraProvider?.unbind(it) }
+        preview = null
+    }
+
+    private fun bindCamera() {
         val provider = cameraProvider ?: return
         provider.unbindAll()
 
@@ -90,13 +117,14 @@ class CameraStreamManager(
             .requireLensFacing(lensFacing)
             .build()
 
-        // Preview Use Case
-        val preview = Preview.Builder()
-            .setTargetResolution(targetResolution)
-            .build()
-        previewView?.let {
-            preview.setSurfaceProvider(it.surfaceProvider)
+        // Preview Use Case (hanya jika ada PreviewView yang terlihat)
+        val preview = previewView?.let { view ->
+            Preview.Builder()
+                .setTargetResolution(targetResolution)
+                .build()
+                .also { it.setSurfaceProvider(view.surfaceProvider) }
         }
+        this.preview = preview
 
         // Image Analysis Use Case (untuk streaming)
         val imageAnalysis = ImageAnalysis.Builder()
@@ -111,7 +139,7 @@ class CameraStreamManager(
 
         try {
             val owner = persistentLifecycleOwner
-            val camera = if (previewView != null) {
+            val camera = if (preview != null) {
                 provider.bindToLifecycle(owner, cameraSelector, preview, imageAnalysis)
             } else {
                 provider.bindToLifecycle(owner, cameraSelector, imageAnalysis)
@@ -197,14 +225,14 @@ class CameraStreamManager(
     fun getActiveListenerCount(): Int = frameListeners.size
 
     // Kontrol Kamera
-    fun switchCamera(previewView: PreviewView?) {
+    fun switchCamera() {
         lensFacing = if (lensFacing == CameraSelector.LENS_FACING_BACK) {
             CameraSelector.LENS_FACING_FRONT
         } else {
             CameraSelector.LENS_FACING_BACK
         }
         isTorchOn = false // Matikan torch saat switch kamera
-        bindCamera(previewView)
+        bindCamera()
     }
 
     fun setTorch(enable: Boolean, onResult: ((Boolean) -> Unit)? = null) {
@@ -224,12 +252,15 @@ class CameraStreamManager(
         cameraControl?.setZoomRatio(zoomRatio)
     }
 
-    fun setResolution(width: Int, height: Int, previewView: PreviewView?) {
+    fun setResolution(width: Int, height: Int) {
         targetResolution = Size(width, height)
-        bindCamera(previewView)
+        bindCamera()
     }
 
     fun stop() {
+        isStopped = true
+        previewView = null
+        preview = null
         persistentLifecycleOwner.stop()
         cameraProvider?.unbindAll()
         cameraExecutor.shutdown()

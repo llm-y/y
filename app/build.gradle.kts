@@ -50,6 +50,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -71,6 +72,10 @@ dependencies {
 
     // Lifecycle Service for background processing
     implementation("androidx.lifecycle:lifecycle-service:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-process:2.7.0")
+
+    // Halaman Pengaturan
+    implementation("androidx.preference:preference-ktx:1.2.1")
 
     // Lightweight Embedded HTTP Server (NanoHTTPD)
     implementation("org.nanohttpd:nanohttpd:2.3.1")

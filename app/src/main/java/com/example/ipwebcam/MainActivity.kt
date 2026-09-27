@@ -3,48 +3,56 @@ package com.example.ipwebcam
 import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
+import android.os.IBinder
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.example.ipwebcam.audio.AudioStreamer
-import com.example.ipwebcam.camera.CameraStreamManager
 import com.example.ipwebcam.databinding.ActivityMainBinding
-import com.example.ipwebcam.server.MjpegHttpServer
 import com.example.ipwebcam.service.WebcamService
 import com.example.ipwebcam.utils.NetworkUtils
+import com.example.ipwebcam.utils.PermissionUtils
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private lateinit var cameraManager: CameraStreamManager
-    private lateinit var audioStreamer: AudioStreamer
-    private var httpServer: MjpegHttpServer? = null
+    // Kamera, server & audio dimiliki WebcamService agar tetap hidup saat layar mati / Activity berhenti
+    private var webcamService: WebcamService? = null
+    private var isBound = false
 
-    private var isServerRunning = false
     private var isAudioEnabled = true
-    private val port = 8080
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+            val service = (binder as WebcamService.LocalBinder).service
+            webcamService = service
+            onServiceReady(service)
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            webcamService = null
+        }
+    }
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
-        val audioGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
 
         if (cameraGranted) {
-            initCamera()
+            bindWebcamService()
         } else {
             Toast.makeText(this, getString(R.string.permission_required), Toast.LENGTH_LONG).show()
         }
@@ -58,26 +66,21 @@ class MainActivity : AppCompatActivity() {
         // Jaga layar tetap menyala selama aplikasi dibuka agar stream tidak terhenti
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        // Izinkan kamera tetap aktif di lockscreen / saat tombol power ditekan
+        // Tampilkan aplikasi di atas lockscreen saat layar dinyalakan lagi.
+        // Sengaja tanpa turnScreenOn agar layar tetap bisa dimatikan dengan tombol power.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
-            setTurnScreenOn(true)
         } else {
             @Suppress("DEPRECATION")
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
             )
         }
-
-        cameraManager = CameraStreamManager(this)
-        audioStreamer = AudioStreamer()
 
         setupListeners()
         setupBlackScreenMode()
         checkPermissionsAndStart()
-        checkOverlayPermission()
         checkBatteryOptimization()
     }
 
@@ -94,101 +97,129 @@ class MainActivity : AppCompatActivity() {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
 
-        if (notGranted.isEmpty()) {
-            initCamera()
-        } else {
+        if (notGranted.isNotEmpty()) {
             permissionLauncher.launch(notGranted.toTypedArray())
         }
     }
 
-    /**
-     * Meminta izin 'Tampilkan di Atas Aplikasi Lain' (SYSTEM_ALERT_WINDOW)
-     * agar kamera tetap aktif saat tombol power ditekan / layar mati atau saat membuka aplikasi lain.
-     */
-    private fun checkOverlayPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
-            AlertDialog.Builder(this)
-                .setTitle("Izin Layar Mati & Background")
-                .setMessage("Agar kamera tetap streaming saat layar dimatikan atau saat membuka aplikasi lain, silakan aktifkan izin 'Tampilkan di Atas Aplikasi Lain'.")
-                .setPositiveButton("Buka Pengaturan") { _, _ ->
-                    try {
-                        val intent = Intent(
-                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                            Uri.parse("package:$packageName")
-                        )
-                        startActivity(intent)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+    private fun hasCameraPermission(): Boolean =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+
+    override fun onStart() {
+        super.onStart()
+        if (hasCameraPermission()) {
+            bindWebcamService()
+        }
+    }
+
+    override fun onStop() {
+        // Layar dimatikan / pindah aplikasi: lepas preview, stream tetap jalan di service
+        unbindWebcamService()
+        super.onStop()
+    }
+
+    private fun bindWebcamService() {
+        if (isBound) return
+        isBound = bindService(
+            Intent(this, WebcamService::class.java),
+            serviceConnection,
+            Context.BIND_AUTO_CREATE
+        )
+    }
+
+    private fun unbindWebcamService() {
+        webcamService?.let { service ->
+            service.cameraManager.detachPreview()
+            service.cameraManager.onFpsUpdated = null
+            service.onStreamingStateChanged = null
+            service.onClientCountChanged = null
+            service.onControlAction = null
+        }
+        webcamService = null
+        if (isBound) {
+            unbindService(serviceConnection)
+            isBound = false
+        }
+    }
+
+    private fun onServiceReady(service: WebcamService) {
+        service.cameraManager.attachPreview(binding.previewView)
+        binding.tvStandby.visibility = View.GONE
+
+        service.cameraManager.onFpsUpdated = { fps ->
+            runOnUiThread {
+                binding.tvFps.text = "$fps FPS"
+            }
+        }
+        service.onClientCountChanged = { count ->
+            binding.tvClients.text = "$count Clients"
+        }
+        service.onControlAction = { action, value ->
+            when (action) {
+                "camera", "torch" -> updateTorchButtonState()
+                "quality" -> {
+                    value.toIntOrNull()?.let { q ->
+                        binding.sliderQuality.value = q.coerceIn(30, 100) / 5 * 5f
+                        binding.tvQualityValue.text = "$q%"
                     }
                 }
-                .setNegativeButton("Nanti Saja", null)
-                .show()
+            }
         }
+        service.onStreamingStateChanged = {
+            updateServerUi()
+            val message = if (service.isStreaming) "Server aktif di ${service.streamUrl}" else "Server dihentikan"
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        }
+
+        // Sinkronkan UI dengan status service (stream mungkin sudah berjalan sejak sebelum layar mati)
+        val quality = service.cameraManager.jpegQuality
+        binding.sliderQuality.value = quality.coerceIn(30, 100) / 5 * 5f
+        binding.tvQualityValue.text = "$quality%"
+        binding.tvClients.text = "${service.cameraManager.getActiveListenerCount()} Clients"
+        updateTorchButtonState()
+        updateServerUi()
     }
 
     /**
      * Meminta pengecualian Optimasi Baterai agar socket jaringan & CPU tidak di-freeze oleh sistem Android saat layar mati.
+     * Izin opsional lain (overlay kamera) ada di halaman Pengaturan.
      */
     private fun checkBatteryOptimization() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val pm = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
-            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                AlertDialog.Builder(this)
-                    .setTitle("Izin Hemat Daya (Penting)")
-                    .setMessage("Agar streaming video dan data tidak membeku (freeze) saat tombol power ditekan, silakan pilih 'Tidak Dibatasi / Unrestricted' untuk aplikasi ini.")
-                    .setPositiveButton("Buka Pengaturan") { _, _ ->
-                        try {
-                            val intent = Intent(
-                                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                                Uri.parse("package:$packageName")
-                            )
-                            startActivity(intent)
-                        } catch (e: Exception) {
-                            try {
-                                startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-                            } catch (e2: Exception) {
-                                e2.printStackTrace()
-                            }
-                        }
-                    }
-                    .setNegativeButton("Nanti Saja", null)
-                    .show()
-            }
-        }
-    }
-
-    private fun initCamera() {
-        cameraManager.startCamera(binding.previewView) {
-            runOnUiThread {
-                binding.tvStandby.visibility = View.GONE
-            }
-        }
-
-        cameraManager.onFpsUpdated = { fps ->
-            runOnUiThread {
-                binding.tvFps.text = "$fps FPS"
-            }
+        if (!PermissionUtils.isIgnoringBatteryOptimizations(this)) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle("Streaming saat layar mati")
+                .setMessage("Agar video tidak berhenti saat tombol power ditekan, izinkan aplikasi ini mengabaikan optimasi baterai.")
+                .setPositiveButton("Izinkan") { _, _ -> PermissionUtils.openBatteryOptimizationSettings(this) }
+                .setNegativeButton("Nanti", null)
+                .show()
         }
     }
 
     private fun setupListeners() {
         // Toggle Server Button
         binding.btnToggleServer.setOnClickListener {
-            if (isServerRunning) {
-                stopServer()
-            } else {
-                startServer()
+            val service = webcamService
+            when {
+                service?.isStreaming == true -> service.stopStreaming()
+                !hasCameraPermission() -> checkPermissionsAndStart()
+                else -> WebcamService.startStreaming(this)
             }
+        }
+
+        // Pengaturan (streaming di background & overlay kamera)
+        binding.btnSettings.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
         }
 
         // Switch Camera (Front/Back)
         binding.btnFlipCamera.setOnClickListener {
-            cameraManager.switchCamera(binding.previewView)
+            webcamService?.cameraManager?.switchCamera()
             updateTorchButtonState()
         }
 
         // Flash / Torch Toggle
         binding.btnToggleTorch.setOnClickListener {
+            val cameraManager = webcamService?.cameraManager ?: return@setOnClickListener
             val newState = !cameraManager.isTorchOn
             cameraManager.setTorch(newState) { success ->
                 if (success) {
@@ -207,7 +238,7 @@ class MainActivity : AppCompatActivity() {
                 binding.btnToggleAudio.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
                 Toast.makeText(this, "Audio Streaming Aktif", Toast.LENGTH_SHORT).show()
             } else {
-                audioStreamer.stop()
+                webcamService?.audioStreamer?.stop()
                 binding.btnToggleAudio.setImageResource(R.drawable.ic_mic_off)
                 binding.btnToggleAudio.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.text_secondary))
                 Toast.makeText(this, "Audio Streaming Dimatikan", Toast.LENGTH_SHORT).show()
@@ -218,7 +249,7 @@ class MainActivity : AppCompatActivity() {
         binding.sliderQuality.addOnChangeListener { _, value, fromUser ->
             if (fromUser) {
                 val q = value.toInt()
-                cameraManager.jpegQuality = q
+                webcamService?.cameraManager?.jpegQuality = q
                 binding.tvQualityValue.text = "$q%"
             }
         }
@@ -264,9 +295,10 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        val port = WebcamService.PORT
         val items = ips.map { "${it.type}: http://${it.ip}:$port" }.toTypedArray()
 
-        AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setTitle("Pilih / Salin Alamat IP")
             .setItems(items) { _, which ->
                 val selected = "http://${ips[which].ip}:$port"
@@ -282,7 +314,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showTroubleshootDialog() {
-        AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setTitle("Tidak Bisa Diakses dari Laptop?")
             .setMessage(
                 "Penyebab paling umum:\n\n" +
@@ -303,98 +335,41 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show()
     }
 
-    private fun startServer() {
-        val ip = NetworkUtils.getLocalIpAddress(this)
-        val baseUrl = "http://$ip:$port"
-
-        try {
-            httpServer = MjpegHttpServer(
-                port = port,
-                cameraManager = cameraManager,
-                audioStreamer = audioStreamer,
-                onControlAction = { action, value ->
-                    runOnUiThread {
-                        when (action) {
-                            "camera" -> {
-                                cameraManager.switchCamera(binding.previewView)
-                                updateTorchButtonState()
-                            }
-                            "torch" -> updateTorchButtonState()
-                            "quality" -> {
-                                value.toIntOrNull()?.let { q ->
-                                    binding.sliderQuality.value = q.toFloat()
-                                    binding.tvQualityValue.text = "$q%"
-                                }
-                            }
-                        }
-                    }
-                }
-            ).apply {
-                onClientCountChanged = { count ->
-                    runOnUiThread {
-                        binding.tvClients.text = "$count Clients"
-                    }
-                }
-                start()
-            }
-
-            isServerRunning = true
-
-            // Update UI
+    private fun updateServerUi() {
+        val service = webcamService
+        if (service?.isStreaming == true) {
+            val baseUrl = service.streamUrl ?: ""
             binding.viewStatusDot.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.success))
             binding.tvStatus.text = getString(R.string.server_running)
             binding.tvStreamUrl.text = baseUrl
+            binding.tvStreamUrl.setTextColor(ContextCompat.getColor(this, R.color.primary))
             binding.tvOpencvHint.text = "OpenCV: cv2.VideoCapture('$baseUrl/video')"
 
             binding.btnToggleServer.text = getString(R.string.stop_server)
             binding.btnToggleServer.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.danger))
             binding.btnToggleServer.setIconResource(R.drawable.ic_videocam_off)
-
-            // Start Foreground Service (dengan WakeLock, WifiLock, dan Overlay Window)
-            WebcamService.startService(this, baseUrl)
-
-            Toast.makeText(this, "Server aktif di $baseUrl", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Gagal memulai server: ${e.message}", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private fun stopServer() {
-        try {
-            httpServer?.stop()
-            httpServer = null
-            audioStreamer.stop()
-            WebcamService.stopService(this)
-
-            isServerRunning = false
-
-            // Update UI
+        } else {
             binding.viewStatusDot.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.danger))
             binding.tvStatus.text = getString(R.string.server_stopped)
             binding.tvClients.text = "0 Clients"
 
+            // Tampilkan alamat yang akan dipakai (redup) selama server belum berjalan
+            val baseUrl = "http://${NetworkUtils.getLocalIpAddress(this)}:${WebcamService.PORT}"
+            binding.tvStreamUrl.text = baseUrl
+            binding.tvStreamUrl.setTextColor(ContextCompat.getColor(this, R.color.text_tertiary))
+            binding.tvOpencvHint.text = "OpenCV: cv2.VideoCapture('$baseUrl/video')"
+
             binding.btnToggleServer.text = getString(R.string.start_server)
             binding.btnToggleServer.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
             binding.btnToggleServer.setIconResource(R.drawable.ic_videocam)
-
-            Toast.makeText(this, "Server dihentikan", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 
     private fun updateTorchButtonState() {
-        val isTorch = cameraManager.isTorchOn
+        val isTorch = webcamService?.cameraManager?.isTorchOn ?: false
         binding.btnToggleTorch.setImageResource(if (isTorch) R.drawable.ic_flash_on else R.drawable.ic_flash_off)
         binding.btnToggleTorch.imageTintList = ColorStateList.valueOf(
             ContextCompat.getColor(this, if (isTorch) R.color.warning else R.color.text_primary)
         )
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        stopServer()
-        cameraManager.stop()
     }
 }

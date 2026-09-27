@@ -4,12 +4,22 @@
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_variant</item>
         <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorAccent">@color/primary</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/secondary</item>
         <item name="colorSecondaryVariant">@color/secondary_variant</item>
         <item name="colorOnSecondary">@color/on_secondary</item>
+        <!-- Surface & teks (dipakai dialog Material 3 dan halaman Pengaturan) -->
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorSurfaceContainerHigh">@color/surface_card</item>
+        <item name="colorSurfaceContainerHighest">@color/surface_variant</item>
+        <item name="colorOutline">@color/border</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:statusBarColor">@color/surface</item>
         <item name="android:windowBackground">@color/background</item>
         <item name="android:navigationBarColor">@color/surface</item>
     </style>

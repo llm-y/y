@@ -72,6 +72,12 @@ Android-IP-Webcam/
 3. **Akses Dashboard dari Laptop**:
    - Buka browser di PC/Laptop dan buka alamat `http://192.168.1.15:8080`.
    - Anda dapat melihat tampilan kamera secara langsung dan mengatur senter/lensa/kualitas dari PC.
+4. **Streaming dengan Layar Mati**:
+   - Setelah server berjalan, layar boleh dimatikan dengan tombol power atau aplikasi ditutup; kamera & stream tetap jalan di Foreground Service.
+   - Buka ⚙ **Pengaturan** di pojok kanan atas:
+     - **Streaming di background**: izinkan *Abaikan optimasi baterai* dan *Tampil di atas aplikasi lain*.
+     - **Overlay kamera**: tampilkan indikator kamera saat stream berjalan di background dan pilih posisinya (atas tengah/kiri/kanan, bawah tengah). Ketuk overlay untuk membuka aplikasi.
+   - Hentikan stream lewat tombol **Stop Server** atau tombol **Stop** di notifikasi.
 
 ---
 

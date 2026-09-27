@@ -141,7 +141,7 @@ class MjpegHttpServer(
                     cameraManager.setTorch(value == "on" || value == "true")
                 }
                 "camera" -> {
-                    onControlAction?.invoke("camera", value)
+                    cameraManager.switchCamera()
                 }
                 "quality" -> {
                     value.toIntOrNull()?.let { q ->

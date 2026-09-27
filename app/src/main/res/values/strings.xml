@@ -19,4 +19,23 @@
     <string name="clients_connected">Klien Terhubung</string>
     <string name="permission_required">Izin Kamera dan Mikrofon Diperlukan</string>
     <string name="permission_rationale">Aplikasi ini membutuhkan akses kamera untuk streaming video dan mikrofon untuk streaming audio.</string>
+    <!-- Pengaturan -->
+    <string name="settings_title">Pengaturan</string>
+    <string name="action_settings">Pengaturan</string>
+    <string name="action_black_screen">Mode layar hitam</string>
+    <string name="action_cancel">Batal</string>
+    <string name="pref_category_background">Streaming di background</string>
+    <string name="pref_battery_title">Abaikan optimasi baterai</string>
+    <string name="pref_battery_summary_on">Diizinkan. Stream tetap berjalan saat layar dimatikan</string>
+    <string name="pref_battery_summary_off">Belum diizinkan. Ketuk agar stream tidak berhenti saat layar mati</string>
+    <string name="pref_overlay_permission_title">Tampil di atas aplikasi lain</string>
+    <string name="pref_overlay_permission_summary_on">Diizinkan</string>
+    <string name="pref_overlay_permission_summary_off">Belum diizinkan. Diperlukan untuk overlay kamera</string>
+    <string name="pref_category_overlay">Overlay kamera</string>
+    <string name="pref_show_overlay_title">Tampilkan overlay kamera</string>
+    <string name="pref_show_overlay_summary">Indikator kamera aktif saat streaming berjalan di background</string>
+    <string name="pref_overlay_position_title">Posisi overlay</string>
+    <string name="pref_category_about">Tentang</string>
+    <string name="pref_version_title">Versi aplikasi</string>
+    <string name="overlay_permission_needed">Izinkan \"Tampil di atas aplikasi lain\" agar overlay kamera bisa muncul</string>
 </resources>
