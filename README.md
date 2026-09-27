@@ -67,7 +67,7 @@ Android-IP-Webcam/
 1. **Koneksi Jaringan**:
    - Pastikan HP Android dan Laptop/PC berada pada **jaringan Wi-Fi yang sama** (atau nyalakan **Hotspot Portabel** di HP dan sambungkan Laptop ke hotspot tersebut).
 2. **Jalankan Server**:
-   - Tekan tombol hijau **START SERVER** di aplikasi.
+   - Tekan tombol hijau **Mulai Server** di aplikasi.
    - Layar akan menampilkan URL, misalnya: `http://192.168.1.15:8080`.
 3. **Akses Dashboard dari Laptop**:
    - Buka browser di PC/Laptop dan buka alamat `http://192.168.1.15:8080`.
@@ -75,9 +75,13 @@ Android-IP-Webcam/
 4. **Streaming dengan Layar Mati**:
    - Setelah server berjalan, layar boleh dimatikan dengan tombol power atau aplikasi ditutup; kamera & stream tetap jalan di Foreground Service.
    - Buka ⚙ **Pengaturan** di pojok kanan atas:
-     - **Streaming di background**: izinkan *Abaikan optimasi baterai* dan *Tampil di atas aplikasi lain*.
-     - **Overlay kamera**: tampilkan indikator kamera saat stream berjalan di background dan pilih posisinya (atas tengah/kiri/kanan, bawah tengah). Ketuk overlay untuk membuka aplikasi.
-   - Hentikan stream lewat tombol **Stop Server** atau tombol **Stop** di notifikasi.
+     - **Panduan layar mati**: langkah demi langkah sesuai merek HP (realme/OPPO, Xiaomi, vivo, Samsung, Huawei, dll.), lengkap dengan tombol pintasan ke setiap halaman pengaturan.
+     - **Streaming di latar belakang**: *Abaikan pengoptimalan baterai*, *Aktivitas latar belakang* (pintasan langsung), dan *Tampilkan di atas aplikasi lain*.
+     - **Indikator kamera**: tampilkan indikator saat stream berjalan di latar belakang dan pilih posisinya (atas tengah/kiri/kanan, bawah tengah). Ketuk indikator untuk membuka aplikasi.
+   - Hentikan stream lewat tombol **Hentikan Server** atau tombol **Hentikan** di notifikasi.
+5. **Bahasa**:
+   - Aplikasi otomatis mengikuti bahasa HP (Indonesia / Inggris). Di Android 13+ bahasa juga bisa dipilih lewat Pengaturan › Aplikasi › IP Webcam Pro › Bahasa.
+   - Dashboard web mengikuti bahasa browser.
 
 ---
 

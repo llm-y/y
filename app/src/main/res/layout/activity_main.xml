@@ -103,7 +103,7 @@
                 android:background="@drawable/bg_chip_overlay"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="4dp"
-                android:text="0 Clients"
+                tools:text="0 clients"
                 android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
                 android:textColor="@color/text_primary" />
         </LinearLayout>
@@ -155,7 +155,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Inisialisasi Kamera..."
+            android:text="@string/camera_initializing"
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
             android:visibility="gone" />
@@ -202,7 +202,7 @@
                     android:layout_marginStart="8dp"
                     android:layout_weight="1"
                     android:fontFamily="sans-serif-medium"
-                    android:text="Server Nonaktif"
+                    android:text="@string/server_stopped"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -211,7 +211,7 @@
                     android:id="@+id/tvPort"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Port 8080"
+                    tools:text="Port 8080"
                     android:textColor="@color/text_tertiary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -239,7 +239,7 @@
                         android:id="@+id/tvUrlLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Web Dashboard &amp; Stream URL (Ketuk untuk daftar IP)"
+                        android:text="@string/url_label"
                         android:textColor="@color/text_tertiary"
                         android:textSize="11sp" />
 
@@ -248,7 +248,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="monospace"
-                        android:text="http://0.0.0.0:8080"
+                        tools:text="http://192.168.1.15:8080"
                         android:textColor="@color/primary"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -259,7 +259,7 @@
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Salin URL"
+                    android:contentDescription="@string/copy_url"
                     android:padding="6dp"
                     app:srcCompat="@drawable/ic_copy"
                     app:tint="@color/text_primary" />
@@ -272,7 +272,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:fontFamily="monospace"
-                android:text="Python OpenCV: cv2.VideoCapture('http://...:8080/video')"
+                tools:text="OpenCV: cv2.VideoCapture('http://192.168.1.15:8080/video')"
                 android:textColor="@color/text_secondary"
                 android:textSize="11sp" />
 
@@ -287,7 +287,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Kualitas: "
+                    android:text="@string/quality_label"
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp" />
 
@@ -322,7 +322,7 @@
                 android:layout_height="52dp"
                 android:layout_marginTop="12dp"
                 android:fontFamily="sans-serif-medium"
-                android:text="START SERVER"
+                android:text="@string/start_server"
                 android:textColor="@color/on_primary"
                 android:textSize="15sp"
                 android:textStyle="bold"
@@ -356,7 +356,7 @@
             android:alpha="0.25"
             android:gravity="center"
             android:padding="24dp"
-            android:text="Mode Layar Hitam Aktif\nStreaming Tetap Berjalan\n\n(Ketuk layar untuk kembali)"
+            android:text="@string/black_screen_text"
             android:textColor="#FFFFFF"
             android:textSize="14sp" />
     </FrameLayout>

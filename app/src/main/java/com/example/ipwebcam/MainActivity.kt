@@ -20,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.ipwebcam.databinding.ActivityMainBinding
 import com.example.ipwebcam.service.WebcamService
+import com.example.ipwebcam.utils.NetworkIpInfo
+import com.example.ipwebcam.utils.NetworkType
 import com.example.ipwebcam.utils.NetworkUtils
 import com.example.ipwebcam.utils.PermissionUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -77,6 +79,9 @@ class MainActivity : AppCompatActivity() {
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
             )
         }
+
+        binding.tvPort.text = getString(R.string.port_label, WebcamService.PORT)
+        updateServerUi()
 
         setupListeners()
         setupBlackScreenMode()
@@ -148,12 +153,10 @@ class MainActivity : AppCompatActivity() {
 
         service.cameraManager.onFpsUpdated = { fps ->
             runOnUiThread {
-                binding.tvFps.text = "$fps FPS"
+                binding.tvFps.text = getString(R.string.fps_value, fps)
             }
         }
-        service.onClientCountChanged = { count ->
-            binding.tvClients.text = "$count Clients"
-        }
+        service.onClientCountChanged = { count -> showClientCount(count) }
         service.onControlAction = { action, value ->
             when (action) {
                 "camera", "torch" -> updateTorchButtonState()
@@ -167,7 +170,11 @@ class MainActivity : AppCompatActivity() {
         }
         service.onStreamingStateChanged = {
             updateServerUi()
-            val message = if (service.isStreaming) "Server aktif di ${service.streamUrl}" else "Server dihentikan"
+            val message = if (service.isStreaming) {
+                getString(R.string.server_started_at, service.streamUrl)
+            } else {
+                getString(R.string.server_stopped_toast)
+            }
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
 
@@ -175,7 +182,7 @@ class MainActivity : AppCompatActivity() {
         val quality = service.cameraManager.jpegQuality
         binding.sliderQuality.value = quality.coerceIn(30, 100) / 5 * 5f
         binding.tvQualityValue.text = "$quality%"
-        binding.tvClients.text = "${service.cameraManager.getActiveListenerCount()} Clients"
+        showClientCount(service.cameraManager.getActiveListenerCount())
         updateTorchButtonState()
         updateServerUi()
     }
@@ -187,10 +194,13 @@ class MainActivity : AppCompatActivity() {
     private fun checkBatteryOptimization() {
         if (!PermissionUtils.isIgnoringBatteryOptimizations(this)) {
             MaterialAlertDialogBuilder(this)
-                .setTitle("Streaming saat layar mati")
-                .setMessage("Agar video tidak berhenti saat tombol power ditekan, izinkan aplikasi ini mengabaikan optimasi baterai.")
-                .setPositiveButton("Izinkan") { _, _ -> PermissionUtils.openBatteryOptimizationSettings(this) }
-                .setNegativeButton("Nanti", null)
+                .setTitle(R.string.battery_dialog_title)
+                .setMessage(R.string.battery_dialog_message)
+                .setPositiveButton(R.string.action_allow) { _, _ -> PermissionUtils.openBatteryOptimizationSettings(this) }
+                .setNegativeButton(R.string.action_later, null)
+                .setNeutralButton(R.string.action_guide) { _, _ ->
+                    startActivity(Intent(this, GuideActivity::class.java))
+                }
                 .show()
         }
     }
@@ -225,7 +235,7 @@ class MainActivity : AppCompatActivity() {
                 if (success) {
                     updateTorchButtonState()
                 } else {
-                    Toast.makeText(this, "Torch tidak tersedia di kamera depan", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.torch_unavailable, Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -236,12 +246,12 @@ class MainActivity : AppCompatActivity() {
             if (isAudioEnabled) {
                 binding.btnToggleAudio.setImageResource(R.drawable.ic_mic)
                 binding.btnToggleAudio.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
-                Toast.makeText(this, "Audio Streaming Aktif", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.audio_on, Toast.LENGTH_SHORT).show()
             } else {
                 webcamService?.audioStreamer?.stop()
                 binding.btnToggleAudio.setImageResource(R.drawable.ic_mic_off)
                 binding.btnToggleAudio.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.text_secondary))
-                Toast.makeText(this, "Audio Streaming Dimatikan", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.audio_off, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -277,7 +287,7 @@ class MainActivity : AppCompatActivity() {
             val lp = window.attributes
             lp.screenBrightness = 0.01f
             window.attributes = lp
-            Toast.makeText(this, "Mode layar gelap aktif. Ketuk layar untuk kembali.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.black_screen_toast, Toast.LENGTH_SHORT).show()
         }
 
         binding.blackScreenOverlay.setOnClickListener {
@@ -291,23 +301,23 @@ class MainActivity : AppCompatActivity() {
     private fun showIpListDialog() {
         val ips = NetworkUtils.getAllIpAddresses()
         if (ips.isEmpty()) {
-            Toast.makeText(this, "Tidak ada koneksi jaringan lokal terdeteksi", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.no_network, Toast.LENGTH_SHORT).show()
             return
         }
 
         val port = WebcamService.PORT
-        val items = ips.map { "${it.type}: http://${it.ip}:$port" }.toTypedArray()
+        val items = ips.map { "${networkLabel(it)}: http://${it.ip}:$port" }.toTypedArray()
 
         MaterialAlertDialogBuilder(this)
-            .setTitle("Pilih / Salin Alamat IP")
+            .setTitle(R.string.ip_dialog_title)
             .setItems(items) { _, which ->
                 val selected = "http://${ips[which].ip}:$port"
                 binding.tvStreamUrl.text = selected
-                binding.tvOpencvHint.text = "OpenCV: cv2.VideoCapture('$selected/video')"
+                binding.tvOpencvHint.text = getString(R.string.opencv_hint, selected)
                 copyToClipboard(selected)
             }
-            .setPositiveButton("Tutup", null)
-            .setNeutralButton("Tips Koneksi") { _, _ ->
+            .setPositiveButton(R.string.action_close, null)
+            .setNeutralButton(R.string.connection_tips) { _, _ ->
                 showTroubleshootDialog()
             }
             .show()
@@ -315,18 +325,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun showTroubleshootDialog() {
         MaterialAlertDialogBuilder(this)
-            .setTitle("Tidak Bisa Diakses dari Laptop?")
-            .setMessage(
-                "Penyebab paling umum:\n\n" +
-                "1. AP Isolation pada Router Wi-Fi:\n" +
-                "Banyak router Wi-Fi kantor/kos/IndiHome memblokir komunikasi antar perangkat.\n\n" +
-                "SOLUSI TERBAIK:\n" +
-                "Nyalakan Hotspot Pribadi di HP ini, lalu sambungkan Laptop ke Hotspot HP tersebut.\n\n" +
-                "2. Windows Firewall di Laptop:\n" +
-                "Pastikan port 8080 tidak diblokir di Windows Defender Firewall pada Laptop."
-            )
-            .setPositiveButton("Mengerti", null)
+            .setTitle(R.string.troubleshoot_title)
+            .setMessage(R.string.troubleshoot_message)
+            .setPositiveButton(R.string.action_got_it, null)
             .show()
+    }
+
+    private fun networkLabel(info: NetworkIpInfo): String = when (info.type) {
+        NetworkType.WIFI -> getString(R.string.network_wifi)
+        NetworkType.HOTSPOT -> getString(R.string.network_hotspot)
+        NetworkType.USB -> getString(R.string.network_usb)
+        NetworkType.ETHERNET -> getString(R.string.network_ethernet)
+        NetworkType.OTHER -> getString(R.string.network_other, info.interfaceName)
+    }
+
+    private fun showClientCount(count: Int) {
+        binding.tvClients.text = resources.getQuantityString(R.plurals.clients_count, count, count)
     }
 
     private fun copyToClipboard(url: String) {
@@ -343,7 +357,7 @@ class MainActivity : AppCompatActivity() {
             binding.tvStatus.text = getString(R.string.server_running)
             binding.tvStreamUrl.text = baseUrl
             binding.tvStreamUrl.setTextColor(ContextCompat.getColor(this, R.color.primary))
-            binding.tvOpencvHint.text = "OpenCV: cv2.VideoCapture('$baseUrl/video')"
+            binding.tvOpencvHint.text = getString(R.string.opencv_hint, baseUrl)
 
             binding.btnToggleServer.text = getString(R.string.stop_server)
             binding.btnToggleServer.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.danger))
@@ -351,13 +365,13 @@ class MainActivity : AppCompatActivity() {
         } else {
             binding.viewStatusDot.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.danger))
             binding.tvStatus.text = getString(R.string.server_stopped)
-            binding.tvClients.text = "0 Clients"
+            showClientCount(0)
 
             // Tampilkan alamat yang akan dipakai (redup) selama server belum berjalan
             val baseUrl = "http://${NetworkUtils.getLocalIpAddress(this)}:${WebcamService.PORT}"
             binding.tvStreamUrl.text = baseUrl
             binding.tvStreamUrl.setTextColor(ContextCompat.getColor(this, R.color.text_tertiary))
-            binding.tvOpencvHint.text = "OpenCV: cv2.VideoCapture('$baseUrl/video')"
+            binding.tvOpencvHint.text = getString(R.string.opencv_hint, baseUrl)
 
             binding.btnToggleServer.text = getString(R.string.start_server)
             binding.btnToggleServer.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))

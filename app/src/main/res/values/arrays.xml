@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="overlay_position_entries">
-        <item>Atas tengah</item>
-        <item>Atas kiri</item>
-        <item>Atas kanan</item>
-        <item>Bawah tengah</item>
+        <item>Top center</item>
+        <item>Top left</item>
+        <item>Top right</item>
+        <item>Bottom center</item>
     </string-array>
 
     <string-array name="overlay_position_values" translatable="false">

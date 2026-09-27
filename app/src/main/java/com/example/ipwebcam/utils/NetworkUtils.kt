@@ -7,8 +7,10 @@ import java.net.Inet4Address
 import java.net.NetworkInterface
 import java.util.Collections
 
+enum class NetworkType { WIFI, HOTSPOT, USB, ETHERNET, OTHER }
+
 data class NetworkIpInfo(
-    val type: String,
+    val type: NetworkType,
     val ip: String,
     val interfaceName: String
 )
@@ -32,11 +34,11 @@ object NetworkUtils {
                         val name = networkInterface.name.lowercase()
 
                         val type = when {
-                            name.startsWith("wlan") -> "Wi-Fi"
-                            name.startsWith("ap") || name.startsWith("softap") -> "Hotspot HP"
-                            name.startsWith("rndis") || name.startsWith("usb") -> "USB Tethering"
-                            name.startsWith("eth") -> "Ethernet"
-                            else -> "Network (${networkInterface.name})"
+                            name.startsWith("wlan") -> NetworkType.WIFI
+                            name.startsWith("ap") || name.startsWith("softap") -> NetworkType.HOTSPOT
+                            name.startsWith("rndis") || name.startsWith("usb") -> NetworkType.USB
+                            name.startsWith("eth") -> NetworkType.ETHERNET
+                            else -> NetworkType.OTHER
                         }
 
                         list.add(NetworkIpInfo(type, hostAddress, networkInterface.name))
@@ -57,13 +59,13 @@ object NetworkUtils {
         if (ips.isEmpty()) return "127.0.0.1"
 
         // Prioritaskan Wi-Fi, lalu Hotspot HP, lalu USB
-        val wifi = ips.firstOrNull { it.type == "Wi-Fi" }
+        val wifi = ips.firstOrNull { it.type == NetworkType.WIFI }
         if (wifi != null) return wifi.ip
 
-        val hotspot = ips.firstOrNull { it.type == "Hotspot HP" }
+        val hotspot = ips.firstOrNull { it.type == NetworkType.HOTSPOT }
         if (hotspot != null) return hotspot.ip
 
-        val usb = ips.firstOrNull { it.type == "USB Tethering" }
+        val usb = ips.firstOrNull { it.type == NetworkType.USB }
         if (usb != null) return usb.ip
 
         return ips.first().ip

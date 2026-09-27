@@ -164,7 +164,7 @@ class WebcamService : LifecycleService() {
         } catch (e: Exception) {
             e.printStackTrace()
             httpServer = null
-            Toast.makeText(this, "Gagal memulai server: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.server_start_failed, e.message), Toast.LENGTH_LONG).show()
             stopStreaming()
             return
         }
@@ -284,7 +284,7 @@ class WebcamService : LifecycleService() {
                 y = margin
             }
 
-            val label = SpannableString("\u25CF  IP Webcam: kamera streaming").apply {
+            val label = SpannableString("\u25CF  " + getString(R.string.overlay_label)).apply {
                 setSpan(ForegroundColorSpan(ContextCompat.getColor(this@WebcamService, R.color.danger)), 0, 1, 0)
             }
             val view = TextView(this).apply {
@@ -359,10 +359,10 @@ class WebcamService : LifecycleService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "IP Webcam Service",
+                getString(R.string.notification_channel_name),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Notifikasi status streaming kamera aktif"
+                description = getString(R.string.notification_channel_desc)
             }
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
@@ -385,11 +385,11 @@ class WebcamService : LifecycleService() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("IP Webcam Pro Aktif (Background Stream)")
-            .setContentText("Streaming aktif di $streamUrl")
+            .setContentTitle(getString(R.string.notification_title))
+            .setContentText(getString(R.string.notification_text, streamUrl))
             .setSmallIcon(R.drawable.ic_videocam)
             .setContentIntent(pendingIntent)
-            .addAction(R.drawable.ic_videocam_off, "Stop", stopIntent)
+            .addAction(R.drawable.ic_videocam_off, getString(R.string.action_stop), stopIntent)
             .setOngoing(true)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()

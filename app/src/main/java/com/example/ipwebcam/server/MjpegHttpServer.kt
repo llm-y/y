@@ -28,11 +28,12 @@ class MjpegHttpServer(
         val uri = session.uri
         val method = session.method
         val params = session.parameters
+        val indonesian = prefersIndonesian(session)
 
         return when {
             // Web Dashboard
             uri == "/" || uri == "/index.html" -> {
-                val html = getDashboardHtml(session.headers["host"] ?: "localhost:8080")
+                val html = getDashboardHtml(session.headers["host"] ?: "localhost:8080", indonesian)
                 newFixedLengthResponse(Response.Status.OK, "text/html; charset=UTF-8", html)
             }
 
@@ -43,7 +44,7 @@ class MjpegHttpServer(
 
             // Snapshot Single Frame
             uri == "/shot.jpg" || uri == "/snapshot" -> {
-                serveSnapshot()
+                serveSnapshot(indonesian)
             }
 
             // Live Audio Stream (WAV)
@@ -67,7 +68,11 @@ class MjpegHttpServer(
             }
 
             else -> {
-                newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "404 Not Found")
+                newFixedLengthResponse(
+                    Response.Status.NOT_FOUND,
+                    "text/plain",
+                    if (indonesian) "404 Tidak Ditemukan" else "404 Not Found"
+                )
             }
         }
     }
@@ -92,7 +97,20 @@ class MjpegHttpServer(
         return response
     }
 
-    private fun serveSnapshot(): Response {
+    /**
+     * Bahasa dashboard mengikuti bahasa utama browser (header Accept-Language), default Inggris.
+     */
+    private fun prefersIndonesian(session: IHTTPSession): Boolean {
+        val primary = session.headers["accept-language"]
+            ?.split(",")
+            ?.firstOrNull()
+            ?.trim()
+            ?.lowercase()
+            ?: return false
+        return primary.startsWith("id") || primary.startsWith("in")
+    }
+
+    private fun serveSnapshot(indonesian: Boolean): Response {
         val frame = cameraManager.getLatestFrame()
         return if (frame != null) {
             val stream = ByteArrayInputStream(frame)
@@ -106,7 +124,11 @@ class MjpegHttpServer(
             response.addHeader("Access-Control-Allow-Origin", "*")
             response
         } else {
-            newFixedLengthResponse(Response.Status.SERVICE_UNAVAILABLE, "text/plain", "Kamera belum siap")
+            newFixedLengthResponse(
+                Response.Status.SERVICE_UNAVAILABLE,
+                "text/plain",
+                if (indonesian) "Kamera belum siap" else "Camera not ready"
+            )
         }
     }
 
@@ -254,14 +276,16 @@ class MjpegHttpServer(
     /**
      * Dashboard HTML5 Web Client yang elegan & responsif
      */
-    private fun getDashboardHtml(host: String): String {
+    private fun getDashboardHtml(host: String, indonesian: Boolean): String {
+        fun t(en: String, id: String) = if (indonesian) id else en
+
         return """
 <!DOCTYPE html>
-<html lang="id">
+<html lang="${t("en", "id")}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Android IP Webcam Pro - Dashboard</title>
+    <title>IP Webcam Pro - ${t("Dashboard", "Dasbor")}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -536,9 +560,9 @@ class MjpegHttpServer(
         <div class="badges">
             <div class="badge">
                 <span class="badge-dot"></span>
-                <span>LIVE</span>
+                <span>${t("LIVE", "LANGSUNG")}</span>
             </div>
-            <div class="badge" id="clientBadge">1 Klien</div>
+            <div class="badge" id="clientBadge">${t("1 client", "1 klien")}</div>
         </div>
     </header>
 
@@ -546,12 +570,12 @@ class MjpegHttpServer(
         <div>
             <div class="video-container">
                 <div class="video-overlay" id="fpsDisplay">FPS: 30</div>
-                <img src="/video" id="liveStream" alt="Live Camera Stream">
+                <img src="/video" id="liveStream" alt="${t("Live camera stream", "Stream kamera langsung")}">
             </div>
 
             <!-- Audio Player -->
             <div class="panel" style="margin-top: 16px;">
-                <h3>🎙️ Live Audio Streaming</h3>
+                <h3>🎙️ ${t("Live Audio", "Audio Langsung")}</h3>
                 <audio controls src="/audio" preload="none"></audio>
             </div>
         </div>
@@ -559,16 +583,16 @@ class MjpegHttpServer(
         <div class="sidebar">
             <!-- Camera Controls -->
             <div class="panel">
-                <h3>🎮 Kontrol Kamera</h3>
+                <h3>🎮 ${t("Camera Controls", "Kontrol Kamera")}</h3>
                 <div class="control-group">
                     <div class="btn-grid">
-                        <button class="btn" onclick="sendControl('camera', 'switch')">🔄 Ganti Lensa</button>
-                        <button class="btn" id="btnTorch" onclick="toggleTorch()">💡 Flash: OFF</button>
+                        <button class="btn" onclick="sendControl('camera', 'switch')">🔄 ${t("Switch Lens", "Ganti Lensa")}</button>
+                        <button class="btn" id="btnTorch" onclick="toggleTorch()">💡 ${t("Flashlight: OFF", "Senter: MATI")}</button>
                     </div>
 
                     <div class="slider-control" style="margin-top: 8px;">
                         <div class="slider-label">
-                            <span>Digital Zoom</span>
+                            <span>${t("Digital Zoom", "Zoom Digital")}</span>
                             <span id="zoomVal">1.0x</span>
                         </div>
                         <input type="range" min="1.0" max="5.0" step="0.1" value="1.0" oninput="updateZoom(this.value)">
@@ -576,36 +600,36 @@ class MjpegHttpServer(
 
                     <div class="slider-control">
                         <div class="slider-label">
-                            <span>Kualitas JPEG</span>
+                            <span>${t("JPEG Quality", "Kualitas JPEG")}</span>
                             <span id="qualVal">80%</span>
                         </div>
                         <input type="range" min="30" max="100" step="5" value="80" onchange="sendControl('quality', this.value); document.getElementById('qualVal').innerText = this.value + '%'">
                     </div>
 
                     <a href="/shot.jpg" target="_blank" download="snapshot.jpg" class="btn btn-primary" style="text-decoration: none; margin-top: 6px;">
-                        📸 Ambil Foto Snapshot
+                        📸 ${t("Take Snapshot", "Ambil Foto")}
                     </a>
                 </div>
             </div>
 
             <!-- Quick URLs for Developers & OpenCV -->
             <div class="panel">
-                <h3>🔗 URL Integrasi</h3>
+                <h3>🔗 ${t("Integration URLs", "URL Integrasi")}</h3>
                 <div class="control-group">
                     <div>
-                        <div class="url-label">OpenCV / Python Stream:</div>
+                        <div class="url-label">${t("OpenCV / Python stream:", "Stream OpenCV / Python:")}</div>
                         <div class="url-box" onclick="copyText('http://${host}/video')">
                             http://${host}/video
                         </div>
                     </div>
                     <div>
-                        <div class="url-label">Single Snapshot (Foto):</div>
+                        <div class="url-label">${t("Single snapshot:", "Foto tunggal:")}</div>
                         <div class="url-box" onclick="copyText('http://${host}/shot.jpg')">
                             http://${host}/shot.jpg
                         </div>
                     </div>
                     <div>
-                        <div class="url-label">WAV Audio:</div>
+                        <div class="url-label">${t("WAV audio:", "Audio WAV:")}</div>
                         <div class="url-box" onclick="copyText('http://${host}/audio')">
                             http://${host}/audio
                         </div>
@@ -626,7 +650,7 @@ class MjpegHttpServer(
         function toggleTorch() {
             torchOn = !torchOn;
             sendControl('torch', torchOn ? 'on' : 'off');
-            document.getElementById('btnTorch').innerText = torchOn ? '💡 Flash: ON' : '💡 Flash: OFF';
+            document.getElementById('btnTorch').innerText = torchOn ? '💡 ${t("Flashlight: ON", "Senter: NYALA")}' : '💡 ${t("Flashlight: OFF", "Senter: MATI")}';
             document.getElementById('btnTorch').style.borderColor = torchOn ? '#00d26a' : '';
         }
 
@@ -637,7 +661,7 @@ class MjpegHttpServer(
 
         function copyText(text) {
             navigator.clipboard.writeText(text).then(() => {
-                alert('Tersalin ke clipboard: ' + text);
+                alert('${t("Copied to clipboard: ", "Disalin ke papan klip: ")}' + text);
             });
         }
 
@@ -650,7 +674,8 @@ class MjpegHttpServer(
                         document.getElementById('fpsDisplay').innerText = 'FPS: ' + data.fps;
                     }
                     if (data.clients !== undefined) {
-                        document.getElementById('clientBadge').innerText = data.clients + ' Klien';
+                        document.getElementById('clientBadge').innerText = data.clients + ' ' +
+                            (data.clients === 1 ? '${t("client", "klien")}' : '${t("clients", "klien")}');
                     }
                 })
                 .catch(() => {});

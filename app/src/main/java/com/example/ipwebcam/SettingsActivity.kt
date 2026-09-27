@@ -1,5 +1,6 @@
 package com.example.ipwebcam
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -9,6 +10,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.example.ipwebcam.databinding.ActivitySettingsBinding
 import com.example.ipwebcam.service.WebcamService
+import com.example.ipwebcam.utils.DeviceGuide
 import com.example.ipwebcam.utils.PermissionUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
@@ -35,6 +37,19 @@ class SettingsActivity : AppCompatActivity() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             preferenceManager.sharedPreferencesName = WebcamService.PREFS_NAME
             setPreferencesFromResource(R.xml.preferences, rootKey)
+
+            findPreference<Preference>(KEY_GUIDE)?.apply {
+                summary = getString(R.string.pref_guide_summary, DeviceGuide.brandName)
+                setOnPreferenceClickListener {
+                    startActivity(Intent(requireContext(), GuideActivity::class.java))
+                    true
+                }
+            }
+
+            findPreference<Preference>(KEY_BACKGROUND_ACTIVITY)?.setOnPreferenceClickListener {
+                DeviceGuide.openBackgroundSettings(requireContext())
+                true
+            }
 
             findPreference<Preference>(KEY_BATTERY)?.setOnPreferenceClickListener {
                 PermissionUtils.openBatteryOptimizationSettings(requireContext())
@@ -73,6 +88,13 @@ class SettingsActivity : AppCompatActivity() {
                     R.string.pref_battery_summary_off
                 }
             )
+            findPreference<Preference>(KEY_BACKGROUND_ACTIVITY)?.summary = getString(
+                if (DeviceGuide.isBackgroundRestricted(context)) {
+                    R.string.pref_background_activity_restricted
+                } else {
+                    DeviceGuide.backgroundPath
+                }
+            )
             findPreference<Preference>(KEY_OVERLAY_PERMISSION)?.summary = getString(
                 if (PermissionUtils.hasOverlayPermission(context)) {
                     R.string.pref_overlay_permission_summary_on
@@ -102,7 +124,9 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         companion object {
+            private const val KEY_GUIDE = "screen_off_guide"
             private const val KEY_BATTERY = "battery_optimization"
+            private const val KEY_BACKGROUND_ACTIVITY = "background_activity"
             private const val KEY_OVERLAY_PERMISSION = "overlay_permission"
             private const val KEY_VERSION = "app_version"
         }

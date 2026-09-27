@@ -1,0 +1,132 @@
+<resources>
+    <!-- Bahasa Indonesia: dipakai otomatis jika bahasa HP disetel ke Indonesia -->
+    <string name="start_server">Mulai Server</string>
+    <string name="stop_server">Hentikan Server</string>
+    <string name="server_running">Server Aktif</string>
+    <string name="server_stopped">Server Nonaktif</string>
+    <string name="waiting_for_wifi">Hubungkan ke Wi-Fi / Hotspot</string>
+    <string name="camera_preview">Pratinjau Kamera</string>
+    <string name="stream_url_title">URL Stream</string>
+    <string name="opencv_url_title">URL OpenCV VideoCapture</string>
+    <string name="shot_url_title">URL Foto</string>
+    <string name="copied_to_clipboard">Disalin ke papan klip</string>
+    <string name="switch_camera">Ganti kamera</string>
+    <string name="toggle_torch">Senter</string>
+    <string name="toggle_audio">Streaming audio</string>
+    <string name="resolution">Resolusi</string>
+    <string name="quality">Kualitas JPEG</string>
+    <string name="fps">FPS</string>
+    <string name="clients_connected">Klien terhubung</string>
+    <string name="permission_required">Izin kamera dan mikrofon diperlukan</string>
+    <string name="permission_rationale">Aplikasi ini membutuhkan akses kamera untuk streaming video dan mikrofon untuk streaming audio.</string>
+
+    <!-- Layar utama -->
+    <string name="fps_value">%1$d FPS</string>
+    <plurals name="clients_count">
+        <item quantity="other">%1$d klien</item>
+    </plurals>
+    <string name="camera_initializing">Menyiapkan kamera…</string>
+    <string name="port_label">Port %1$d</string>
+    <string name="url_label">Dasbor web &amp; URL stream (ketuk untuk daftar IP)</string>
+    <string name="quality_label">Kualitas</string>
+    <string name="copy_url">Salin URL</string>
+    <string name="black_screen_text">Mode layar hitam aktif\nStreaming tetap berjalan\n\n(Ketuk layar untuk kembali)</string>
+    <string name="black_screen_toast">Mode layar hitam aktif. Ketuk layar untuk kembali.</string>
+    <string name="server_started_at">Server aktif di %1$s</string>
+    <string name="server_stopped_toast">Server dihentikan</string>
+    <string name="server_start_failed">Gagal memulai server: %1$s</string>
+    <string name="torch_unavailable">Senter tidak tersedia di kamera depan</string>
+    <string name="audio_on">Streaming audio aktif</string>
+    <string name="audio_off">Streaming audio dimatikan</string>
+    <string name="battery_dialog_title">Streaming saat layar mati</string>
+    <string name="battery_dialog_message">Agar video tidak berhenti saat tombol power ditekan, izinkan aplikasi ini mengabaikan pengoptimalan baterai.</string>
+    <string name="action_allow">Izinkan</string>
+    <string name="action_later">Nanti</string>
+    <string name="action_guide">Panduan</string>
+    <string name="action_close">Tutup</string>
+    <string name="action_got_it">Mengerti</string>
+    <string name="action_stop">Hentikan</string>
+
+    <!-- Daftar IP & tips koneksi -->
+    <string name="no_network">Tidak ada koneksi jaringan lokal terdeteksi</string>
+    <string name="ip_dialog_title">Pilih / salin alamat IP</string>
+    <string name="connection_tips">Tips koneksi</string>
+    <string name="troubleshoot_title">Tidak bisa diakses dari laptop?</string>
+    <string name="troubleshoot_message">Penyebab paling umum:\n\n1. Isolasi AP pada router Wi-Fi\nBanyak router Wi-Fi kantor, kampus, atau kos memblokir komunikasi antarperangkat.\n\nSOLUSI TERBAIK:\nNyalakan hotspot pribadi di HP ini, lalu sambungkan laptop ke hotspot tersebut.\n\n2. Windows Firewall di laptop\nPastikan port 8080 tidak diblokir oleh Windows Defender Firewall.</string>
+    <string name="network_wifi">Wi-Fi</string>
+    <string name="network_hotspot">Hotspot HP</string>
+    <string name="network_usb">Tethering USB</string>
+    <string name="network_ethernet">Ethernet</string>
+    <string name="network_other">Jaringan (%1$s)</string>
+
+    <!-- Notifikasi & indikator kamera -->
+    <string name="notification_channel_name">Streaming kamera</string>
+    <string name="notification_channel_desc">Ditampilkan selama streaming kamera aktif</string>
+    <string name="notification_title">IP Webcam Pro sedang streaming</string>
+    <string name="notification_text">Buka %1$s di browser atau OpenCV</string>
+    <string name="overlay_label">Kamera aktif · IP Webcam Pro</string>
+
+    <!-- Pengaturan -->
+    <string name="settings_title">Pengaturan</string>
+    <string name="action_settings">Pengaturan</string>
+    <string name="action_black_screen">Mode layar hitam</string>
+    <string name="action_cancel">Batal</string>
+    <string name="pref_category_background">Streaming di latar belakang</string>
+    <string name="pref_guide_title">Panduan layar mati</string>
+    <string name="pref_guide_summary">Langkah lengkap untuk %1$s agar stream tidak berhenti</string>
+    <string name="pref_battery_title">Abaikan pengoptimalan baterai</string>
+    <string name="pref_battery_summary_on">Diizinkan. Stream tetap berjalan saat layar dimatikan</string>
+    <string name="pref_battery_summary_off">Belum diizinkan. Ketuk agar stream tidak berhenti saat layar mati</string>
+    <string name="pref_background_activity_title">Aktivitas latar belakang</string>
+    <string name="pref_background_activity_restricted">Dibatasi sistem. Ketuk untuk mengizinkan</string>
+    <string name="pref_overlay_permission_title">Tampilkan di atas aplikasi lain</string>
+    <string name="pref_overlay_permission_summary_on">Diizinkan</string>
+    <string name="pref_overlay_permission_summary_off">Belum diizinkan. Diperlukan untuk indikator kamera</string>
+    <string name="pref_category_overlay">Indikator kamera</string>
+    <string name="pref_show_overlay_title">Tampilkan indikator kamera</string>
+    <string name="pref_show_overlay_summary">Muncul di atas layar saat streaming berjalan di latar belakang</string>
+    <string name="pref_overlay_position_title">Posisi indikator</string>
+    <string name="pref_category_about">Tentang</string>
+    <string name="pref_version_title">Versi aplikasi</string>
+    <string name="overlay_permission_needed">Izinkan \"Tampilkan di atas aplikasi lain\" agar indikator kamera bisa muncul</string>
+
+    <!-- Panduan layar mati -->
+    <string name="guide_title">Panduan Layar Mati</string>
+    <string name="guide_intro">Selesaikan langkah berikut agar kamera tetap streaming setelah layar dimatikan dengan tombol power. Nama menu bisa sedikit berbeda tergantung versi sistem.</string>
+    <string name="guide_device_label">Perangkat terdeteksi</string>
+    <string name="guide_open_settings">Buka pengaturan</string>
+    <string name="guide_status_done">Selesai</string>
+    <string name="guide_status_pending">Belum</string>
+    <string name="guide_status_restricted">Dibatasi</string>
+    <string name="guide_status_optional">Opsional</string>
+    <string name="guide_test_title">Cara menguji</string>
+    <string name="guide_test_body">Tekan Mulai Server, matikan layar dengan tombol power, lalu buka URL stream di laptop. Jika video tetap bergerak, pengaturan sudah benar.</string>
+    <string name="guide_open_failed">Halaman pengaturan tidak ditemukan. Buka Pengaturan › Aplikasi › IP Webcam Pro secara manual.</string>
+
+    <string name="guide_step_battery_title">Abaikan pengoptimalan baterai</string>
+    <string name="guide_step_battery_body">Pilih <b>Izinkan</b> pada dialog agar Android tidak menjeda aplikasi saat layar mati.</string>
+    <string name="guide_step_background_title">Izinkan aktivitas latar belakang</string>
+    <string name="guide_step_autostart_title">Izinkan peluncuran otomatis</string>
+    <string name="guide_step_overlay_title">Tampilkan di atas aplikasi lain</string>
+    <string name="guide_step_overlay_body">Diperlukan untuk menampilkan indikator kamera saat streaming di latar belakang.</string>
+    <string name="guide_step_lock_title">Kunci aplikasi di menu Terbaru</string>
+    <string name="guide_step_lock_body">Buka layar <b>Aplikasi terbaru</b>, tekan lama atau geser ke bawah kartu IP Webcam Pro, lalu pilih <b>Kunci</b> agar tidak ikut dibersihkan.</string>
+
+    <string name="guide_bg_oppo">Ketuk <b>Penggunaan baterai</b>, lalu aktifkan <b>Izinkan aktivitas latar belakang</b> dan <b>Izinkan aktivitas latar depan</b>.</string>
+    <string name="guide_bg_xiaomi">Ketuk <b>Penghemat baterai</b>, lalu pilih <b>Tidak ada pembatasan</b>.</string>
+    <string name="guide_bg_vivo">Buka <b>Baterai › Manajemen konsumsi daya latar belakang</b>, cari IP Webcam Pro, lalu pilih <b>Izinkan</b>.</string>
+    <string name="guide_bg_samsung">Ketuk <b>Baterai</b>, lalu pilih <b>Tidak dibatasi</b>. Pastikan juga aplikasi tidak ada di daftar <b>Aplikasi tidur</b> pada Baterai › Batas penggunaan latar belakang.</string>
+    <string name="guide_bg_huawei">Buka <b>Peluncuran aplikasi</b>, cari IP Webcam Pro, matikan <b>Kelola secara otomatis</b>, lalu aktifkan <b>Luncurkan otomatis</b>, <b>Peluncuran sekunder</b>, dan <b>Jalankan di latar belakang</b>.</string>
+    <string name="guide_bg_default">Ketuk <b>Penggunaan baterai aplikasi</b>, lalu pilih <b>Tidak dibatasi</b>.</string>
+
+    <string name="guide_bg_path_oppo">Info aplikasi › Penggunaan baterai › Izinkan aktivitas latar belakang</string>
+    <string name="guide_bg_path_xiaomi">Info aplikasi › Penghemat baterai › Tidak ada pembatasan</string>
+    <string name="guide_bg_path_vivo">Baterai › Konsumsi daya latar belakang › Izinkan</string>
+    <string name="guide_bg_path_samsung">Info aplikasi › Baterai › Tidak dibatasi</string>
+    <string name="guide_bg_path_huawei">Peluncuran aplikasi › Kelola manual › Jalankan di latar belakang</string>
+    <string name="guide_bg_path_default">Info aplikasi › Penggunaan baterai aplikasi › Tidak dibatasi</string>
+
+    <string name="guide_autostart_oppo">Di halaman Penggunaan baterai yang sama, aktifkan <b>Izinkan peluncuran otomatis</b>.</string>
+    <string name="guide_autostart_xiaomi">Aktifkan <b>Mulai otomatis</b> untuk IP Webcam Pro.</string>
+    <string name="guide_autostart_vivo">Buka <b>i Manager › Manajer aplikasi › Mulai otomatis</b>, lalu aktifkan IP Webcam Pro.</string>
+</resources>

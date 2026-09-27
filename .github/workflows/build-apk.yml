@@ -78,7 +78,10 @@ jobs:
             1. Download file `IPWebcam-Pro-debug.apk`.
             2. Buka file yang di-download pada HP.
             3. Jika muncul peringatan keamanan *"Install unknown apps"*, aktifkan izin **Allow from this source**.
-            4. Jalankan aplikasi, izinkan izin **Kamera** dan **Mikrofon**, lalu tekan **START SERVER**.
+            4. Jalankan aplikasi, izinkan izin **Kamera** dan **Mikrofon**, lalu tekan **Mulai Server**.
+            5. Agar stream tetap jalan saat layar dimatikan, buka ⚙ **Pengaturan › Panduan layar mati**.
+
+            Bahasa aplikasi otomatis mengikuti bahasa HP (Indonesia / Inggris).
           files: release_apk/IPWebcam-Pro-debug.apk
           draft: false
           prerelease: false

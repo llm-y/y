@@ -1,41 +1,135 @@
 <resources>
-    <string name="app_name">IP Webcam Pro</string>
+    <!-- Bahasa default (Inggris). Terjemahan Indonesia ada di values-in/strings.xml -->
+    <string name="app_name" translatable="false">IP Webcam Pro</string>
     <string name="start_server">Start Server</string>
     <string name="stop_server">Stop Server</string>
     <string name="server_running">Server Running</string>
     <string name="server_stopped">Server Stopped</string>
-    <string name="waiting_for_wifi">Hubungkan ke Wi-Fi / Hotspot</string>
-    <string name="camera_preview">Pratinjau Kamera</string>
+    <string name="waiting_for_wifi">Connect to Wi-Fi / Hotspot</string>
+    <string name="camera_preview">Camera Preview</string>
     <string name="stream_url_title">Stream URL</string>
     <string name="opencv_url_title">OpenCV VideoCapture URL</string>
     <string name="shot_url_title">Snapshot URL</string>
-    <string name="copied_to_clipboard">Disalin ke clipboard</string>
-    <string name="switch_camera">Ganti Kamera</string>
-    <string name="toggle_torch">Senter / Flash</string>
-    <string name="toggle_audio">Streaming Audio</string>
-    <string name="resolution">Resolusi</string>
-    <string name="quality">Kualitas JPEG</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="switch_camera">Switch camera</string>
+    <string name="toggle_torch">Flashlight</string>
+    <string name="toggle_audio">Audio streaming</string>
+    <string name="resolution">Resolution</string>
+    <string name="quality">JPEG quality</string>
     <string name="fps">FPS</string>
-    <string name="clients_connected">Klien Terhubung</string>
-    <string name="permission_required">Izin Kamera dan Mikrofon Diperlukan</string>
-    <string name="permission_rationale">Aplikasi ini membutuhkan akses kamera untuk streaming video dan mikrofon untuk streaming audio.</string>
+    <string name="clients_connected">Connected clients</string>
+    <string name="permission_required">Camera and microphone permissions are required</string>
+    <string name="permission_rationale">This app needs camera access to stream video and microphone access to stream audio.</string>
+
+    <!-- Layar utama -->
+    <string name="fps_value">%1$d FPS</string>
+    <plurals name="clients_count">
+        <item quantity="one">%1$d client</item>
+        <item quantity="other">%1$d clients</item>
+    </plurals>
+    <string name="camera_initializing">Starting camera…</string>
+    <string name="port_label">Port %1$d</string>
+    <string name="url_label">Web dashboard &amp; stream URL (tap for IP list)</string>
+    <string name="opencv_hint" translatable="false">OpenCV: cv2.VideoCapture(\'%1$s/video\')</string>
+    <string name="quality_label">Quality</string>
+    <string name="copy_url">Copy URL</string>
+    <string name="black_screen_text">Black screen mode on\nStreaming keeps running\n\n(Tap the screen to return)</string>
+    <string name="black_screen_toast">Black screen mode on. Tap the screen to return.</string>
+    <string name="server_started_at">Server running at %1$s</string>
+    <string name="server_stopped_toast">Server stopped</string>
+    <string name="server_start_failed">Failed to start server: %1$s</string>
+    <string name="torch_unavailable">Flashlight isn\'t available on the front camera</string>
+    <string name="audio_on">Audio streaming on</string>
+    <string name="audio_off">Audio streaming off</string>
+    <string name="battery_dialog_title">Keep streaming with the screen off</string>
+    <string name="battery_dialog_message">To keep video running after the power button is pressed, allow this app to ignore battery optimization.</string>
+    <string name="action_allow">Allow</string>
+    <string name="action_later">Later</string>
+    <string name="action_guide">Guide</string>
+    <string name="action_close">Close</string>
+    <string name="action_got_it">Got it</string>
+    <string name="action_stop">Stop</string>
+
+    <!-- Daftar IP & tips koneksi -->
+    <string name="no_network">No local network connection detected</string>
+    <string name="ip_dialog_title">Choose / copy IP address</string>
+    <string name="connection_tips">Connection tips</string>
+    <string name="troubleshoot_title">Can\'t open it from your laptop?</string>
+    <string name="troubleshoot_message">Most common causes:\n\n1. AP isolation on the Wi-Fi router\nMany office, campus or boarding-house routers block devices from talking to each other.\n\nBEST FIX:\nTurn on this phone\'s personal hotspot, then connect your laptop to that hotspot.\n\n2. Windows Firewall on the laptop\nMake sure port 8080 isn\'t blocked by Windows Defender Firewall.</string>
+    <string name="network_wifi">Wi-Fi</string>
+    <string name="network_hotspot">Phone hotspot</string>
+    <string name="network_usb">USB tethering</string>
+    <string name="network_ethernet">Ethernet</string>
+    <string name="network_other">Network (%1$s)</string>
+
+    <!-- Notifikasi & indikator kamera -->
+    <string name="notification_channel_name">Camera streaming</string>
+    <string name="notification_channel_desc">Shown while camera streaming is active</string>
+    <string name="notification_title">IP Webcam Pro is streaming</string>
+    <string name="notification_text">Open %1$s in a browser or OpenCV</string>
+    <string name="overlay_label">Camera active · IP Webcam Pro</string>
+
     <!-- Pengaturan -->
-    <string name="settings_title">Pengaturan</string>
-    <string name="action_settings">Pengaturan</string>
-    <string name="action_black_screen">Mode layar hitam</string>
-    <string name="action_cancel">Batal</string>
-    <string name="pref_category_background">Streaming di background</string>
-    <string name="pref_battery_title">Abaikan optimasi baterai</string>
-    <string name="pref_battery_summary_on">Diizinkan. Stream tetap berjalan saat layar dimatikan</string>
-    <string name="pref_battery_summary_off">Belum diizinkan. Ketuk agar stream tidak berhenti saat layar mati</string>
-    <string name="pref_overlay_permission_title">Tampil di atas aplikasi lain</string>
-    <string name="pref_overlay_permission_summary_on">Diizinkan</string>
-    <string name="pref_overlay_permission_summary_off">Belum diizinkan. Diperlukan untuk overlay kamera</string>
-    <string name="pref_category_overlay">Overlay kamera</string>
-    <string name="pref_show_overlay_title">Tampilkan overlay kamera</string>
-    <string name="pref_show_overlay_summary">Indikator kamera aktif saat streaming berjalan di background</string>
-    <string name="pref_overlay_position_title">Posisi overlay</string>
-    <string name="pref_category_about">Tentang</string>
-    <string name="pref_version_title">Versi aplikasi</string>
-    <string name="overlay_permission_needed">Izinkan \"Tampil di atas aplikasi lain\" agar overlay kamera bisa muncul</string>
+    <string name="settings_title">Settings</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_black_screen">Black screen mode</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="pref_category_background">Background streaming</string>
+    <string name="pref_guide_title">Screen-off guide</string>
+    <string name="pref_guide_summary">Step-by-step setup for %1$s so the stream never stops</string>
+    <string name="pref_battery_title">Ignore battery optimization</string>
+    <string name="pref_battery_summary_on">Allowed. Streaming continues with the screen off</string>
+    <string name="pref_battery_summary_off">Not allowed. Tap so the stream doesn\'t stop when the screen is off</string>
+    <string name="pref_background_activity_title">Background activity</string>
+    <string name="pref_background_activity_restricted">Restricted by the system. Tap to allow</string>
+    <string name="pref_overlay_permission_title">Display over other apps</string>
+    <string name="pref_overlay_permission_summary_on">Allowed</string>
+    <string name="pref_overlay_permission_summary_off">Not allowed. Required for the camera indicator</string>
+    <string name="pref_category_overlay">Camera indicator</string>
+    <string name="pref_show_overlay_title">Show camera indicator</string>
+    <string name="pref_show_overlay_summary">Appears on screen while streaming in the background</string>
+    <string name="pref_overlay_position_title">Indicator position</string>
+    <string name="pref_category_about">About</string>
+    <string name="pref_version_title">App version</string>
+    <string name="overlay_permission_needed">Allow \"Display over other apps\" so the camera indicator can appear</string>
+
+    <!-- Panduan layar mati -->
+    <string name="guide_title">Screen-off Guide</string>
+    <string name="guide_intro">Complete these steps so the camera keeps streaming after you turn the screen off with the power button. Menu names may differ slightly depending on your system version.</string>
+    <string name="guide_device_label">Detected device</string>
+    <string name="guide_open_settings">Open settings</string>
+    <string name="guide_status_done">Done</string>
+    <string name="guide_status_pending">Not yet</string>
+    <string name="guide_status_restricted">Restricted</string>
+    <string name="guide_status_optional">Optional</string>
+    <string name="guide_test_title">How to test</string>
+    <string name="guide_test_body">Tap Start Server, turn the screen off with the power button, then open the stream URL on your laptop. If the video keeps moving, you\'re all set.</string>
+    <string name="guide_open_failed">Settings page not found. Open Settings › Apps › IP Webcam Pro manually.</string>
+
+    <string name="guide_step_battery_title">Ignore battery optimization</string>
+    <string name="guide_step_battery_body">Choose <b>Allow</b> in the dialog so Android doesn\'t pause the app when the screen turns off.</string>
+    <string name="guide_step_background_title">Allow background activity</string>
+    <string name="guide_step_autostart_title">Allow auto launch</string>
+    <string name="guide_step_overlay_title">Display over other apps</string>
+    <string name="guide_step_overlay_body">Needed to show the camera indicator while streaming in the background.</string>
+    <string name="guide_step_lock_title">Lock the app in Recents</string>
+    <string name="guide_step_lock_body">Open the <b>Recents</b> screen, long-press or swipe down on the IP Webcam Pro card, then choose <b>Lock</b> so it isn\'t cleared along with other apps.</string>
+
+    <string name="guide_bg_oppo">Tap <b>Battery usage</b>, then turn on <b>Allow background activity</b> and <b>Allow foreground activity</b>.</string>
+    <string name="guide_bg_xiaomi">Tap <b>Battery saver</b>, then choose <b>No restrictions</b>.</string>
+    <string name="guide_bg_vivo">Open <b>Battery › Background power consumption management</b>, find IP Webcam Pro, then choose <b>Allow</b>.</string>
+    <string name="guide_bg_samsung">Tap <b>Battery</b>, then choose <b>Unrestricted</b>. Also make sure the app isn\'t listed under <b>Sleeping apps</b> in Battery › Background usage limits.</string>
+    <string name="guide_bg_huawei">Open <b>App launch</b>, find IP Webcam Pro, turn off <b>Manage automatically</b>, then turn on <b>Auto-launch</b>, <b>Secondary launch</b> and <b>Run in background</b>.</string>
+    <string name="guide_bg_default">Tap <b>App battery usage</b>, then choose <b>Unrestricted</b>.</string>
+
+    <string name="guide_bg_path_oppo">App info › Battery usage › Allow background activity</string>
+    <string name="guide_bg_path_xiaomi">App info › Battery saver › No restrictions</string>
+    <string name="guide_bg_path_vivo">Battery › Background power consumption › Allow</string>
+    <string name="guide_bg_path_samsung">App info › Battery › Unrestricted</string>
+    <string name="guide_bg_path_huawei">App launch › Manage manually › Run in background</string>
+    <string name="guide_bg_path_default">App info › App battery usage › Unrestricted</string>
+
+    <string name="guide_autostart_oppo">On the same Battery usage page, turn on <b>Allow auto launch</b>.</string>
+    <string name="guide_autostart_xiaomi">Turn on <b>Autostart</b> for IP Webcam Pro.</string>
+    <string name="guide_autostart_vivo">Open <b>i Manager › App manager › Autostart manager</b>, then turn on IP Webcam Pro.</string>
 </resources>

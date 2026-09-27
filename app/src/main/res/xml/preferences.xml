@@ -4,9 +4,19 @@
     <PreferenceCategory app:title="@string/pref_category_background">
 
         <Preference
+            app:icon="@drawable/ic_help"
+            app:key="screen_off_guide"
+            app:title="@string/pref_guide_title" />
+
+        <Preference
             app:icon="@drawable/ic_battery"
             app:key="battery_optimization"
             app:title="@string/pref_battery_title" />
+
+        <Preference
+            app:icon="@drawable/ic_autorenew"
+            app:key="background_activity"
+            app:title="@string/pref_background_activity_title" />
 
         <Preference
             app:icon="@drawable/ic_layers"
